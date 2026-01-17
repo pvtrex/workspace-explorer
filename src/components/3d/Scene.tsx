@@ -1,6 +1,6 @@
-import { Suspense, useRef, useEffect } from 'react';
+import { Suspense, useRef, useEffect, useState } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
-import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
+import { Environment, ContactShadows } from '@react-three/drei';
 import { WorkspaceScene } from './WorkspaceScene';
 import * as THREE from 'three';
 import gsap from 'gsap';
@@ -9,13 +9,23 @@ interface CameraControllerProps {
   targetPosition: [number, number, number];
   targetLookAt: [number, number, number];
   isAnimating: boolean;
+  mousePosition: { x: number; y: number };
+  enableMouseParallax: boolean;
 }
 
-const CameraController = ({ targetPosition, targetLookAt, isAnimating }: CameraControllerProps) => {
+const CameraController = ({ 
+  targetPosition, 
+  targetLookAt, 
+  isAnimating, 
+  mousePosition,
+  enableMouseParallax 
+}: CameraControllerProps) => {
   const { camera } = useThree();
   const lookAtTarget = useRef(new THREE.Vector3(0, 1, 0));
+  const basePosition = useRef(new THREE.Vector3(...targetPosition));
 
   useEffect(() => {
+    basePosition.current.set(...targetPosition);
     if (isAnimating) {
       gsap.to(camera.position, {
         x: targetPosition[0],
@@ -35,6 +45,14 @@ const CameraController = ({ targetPosition, targetLookAt, isAnimating }: CameraC
   }, [targetPosition, targetLookAt, isAnimating, camera]);
 
   useFrame(() => {
+    // Add subtle mouse parallax when enabled
+    if (enableMouseParallax) {
+      const parallaxX = mousePosition.x * 0.15;
+      const parallaxY = mousePosition.y * 0.08;
+      
+      camera.position.x = basePosition.current.x + parallaxX;
+      camera.position.y = basePosition.current.y + parallaxY;
+    }
     camera.lookAt(lookAtTarget.current);
   });
 
@@ -74,6 +92,7 @@ interface SceneProps {
   cameraLookAt?: [number, number, number];
   isAnimating?: boolean;
   screenOn?: boolean;
+  enableMouseParallax?: boolean;
 }
 
 const Scene = ({
@@ -81,7 +100,25 @@ const Scene = ({
   cameraLookAt = [0, 1, 0],
   isAnimating = false,
   screenOn = false,
+  enableMouseParallax = true,
 }: SceneProps) => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Normalize mouse position to -1 to 1
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = -(e.clientY / window.innerHeight) * 2 + 1;
+      setMousePosition({ x, y });
+    };
+
+    if (enableMouseParallax) {
+      window.addEventListener('mousemove', handleMouseMove);
+    }
+
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [enableMouseParallax]);
+
   return (
     <Canvas
       shadows
@@ -94,6 +131,8 @@ const Scene = ({
           targetPosition={cameraPosition}
           targetLookAt={cameraLookAt}
           isAnimating={isAnimating}
+          mousePosition={mousePosition}
+          enableMouseParallax={enableMouseParallax && !isAnimating}
         />
         <Lights />
         <WorkspaceScene screenOn={screenOn} />
