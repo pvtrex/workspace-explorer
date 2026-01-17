@@ -1,34 +1,40 @@
 const JourneyWindow = () => {
   const milestones = [
     {
-      phase: 'The Beginning',
+      phase: 'The Spark',
       year: '2018',
-      content: 'My coding journey started with curiosity—a simple "Hello World" in Python. I was fascinated by how lines of text could create something functional. That spark ignited an obsession with technology.',
+      emoji: '✨',
+      content: "It started with breaking things. I was trying to customize my blog and accidentally deleted the entire CSS file. Instead of panicking, I was fascinated. How did those random-looking characters create something visual? That night, I wrote my first line of code: a simple color change. I refreshed the page probably 50 times just to watch it happen.",
     },
     {
-      phase: 'The Learning Curve',
+      phase: 'The Struggle',
       year: '2019',
-      content: 'Dove deep into web development. HTML, CSS, JavaScript became my daily companions. Built my first website—a terrible portfolio that I was incredibly proud of. Failed often, learned more.',
+      emoji: '🧗',
+      content: "JavaScript broke me. Callbacks, closures, this keyword—nothing made sense. I'd spend hours debugging, only to find a missing semicolon. I almost quit twice. What kept me going? Building a small calculator that actually worked. Seeing users (okay, just my friends) use something I created was addictive.",
     },
     {
-      phase: 'Breaking Through',
+      phase: 'The Click',
       year: '2020',
-      content: 'React changed everything. Suddenly, I could build complex UIs with elegance. Got my first internship, experienced real-world development, understood that code quality matters as much as functionality.',
+      emoji: '💡',
+      content: "React changed everything. Suddenly, the chaos had structure. Components, state, props—it was like someone gave me LEGO blocks instead of clay. Got my first internship. Real code reviews humbled me fast, but I learned more in 3 months than the previous year. Discovered that clean code matters as much as working code.",
     },
     {
-      phase: 'Going Full Stack',
+      phase: 'The Deep End',
       year: '2021',
-      content: 'Backend became my new frontier. Node.js, databases, APIs—the full picture emerged. Started contributing to open source. Built projects that actual users loved and used.',
+      emoji: '🏊',
+      content: "Backend wasn't optional anymore. Node.js became my second language. Databases stopped being scary black boxes. I built my first full-stack app—a task manager that 200 people actually used. The bugs at 2 AM taught me more than any tutorial. Started contributing to open source. Imposter syndrome hit hard, but shipping code was the cure.",
     },
     {
-      phase: 'Professional Growth',
+      phase: 'The Growth',
       year: '2022-2023',
-      content: 'Joined an amazing team, learned architecture at scale, mentored newcomers. Cloud technologies, DevOps, system design became part of my toolkit. Every challenge made me stronger.',
+      emoji: '🌱',
+      content: "Joined an incredible team building products at scale. Learned that architecture decisions at 10 users matter at 100,000 users. Mentored newcomers and realized teaching solidifies learning. Cloud technologies, system design, performance optimization—the toolkit expanded. Every production incident was a masterclass.",
     },
     {
-      phase: 'Current Chapter',
+      phase: 'Now',
       year: '2024',
-      content: 'Now exploring the edges—AI integration, 3D web, performance optimization. Building this portfolio itself pushed my boundaries. The journey continues, always learning, always growing.',
+      emoji: '🚀',
+      content: "I don't just write code anymore—I craft experiences. This portfolio itself pushed my boundaries: 3D graphics, GSAP animations, creative UI patterns. I'm exploring AI integration, WebGL, and the edges of what's possible in a browser. The curious kid who broke his blog CSS is now building things that make people say 'how did they do that?'",
     },
   ];
 
@@ -36,36 +42,41 @@ const JourneyWindow = () => {
     <div className="space-y-8 animate-slide-up">
       <div>
         <h2 className="text-2xl font-bold text-gradient">My Journey</h2>
-        <p className="text-muted-foreground">The story behind the code</p>
+        <p className="text-muted-foreground">Not a resume—a real story</p>
       </div>
 
       <div className="space-y-6">
         {milestones.map((milestone, index) => (
           <div
             key={index}
-            className="glass p-6 rounded-lg relative overflow-hidden"
+            className="glass p-6 rounded-lg relative overflow-hidden group hover:border-primary/30 transition-colors"
             style={{ animationDelay: `${index * 100}ms` }}
           >
             {/* Year badge */}
-            <div className="absolute top-4 right-4 px-3 py-1 bg-primary/20 text-primary text-xs font-mono rounded-full">
-              {milestone.year}
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <span className="text-xl">{milestone.emoji}</span>
+              <span className="px-3 py-1 bg-primary/20 text-primary text-xs font-mono rounded-full">
+                {milestone.year}
+              </span>
             </div>
             
-            <h3 className="text-lg font-semibold text-primary mb-3">{milestone.phase}</h3>
+            <h3 className="text-lg font-semibold text-primary mb-3 pr-24">{milestone.phase}</h3>
             <p className="text-foreground/80 leading-relaxed">{milestone.content}</p>
             
             {/* Decorative gradient */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/50 via-accent/30 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/50 via-accent/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
         ))}
       </div>
 
-      {/* Quote */}
-      <div className="glass p-8 rounded-lg text-center">
-        <p className="text-lg italic text-foreground/90">
-          "The only way to do great work is to love what you do."
+      {/* Personal touch */}
+      <div className="glass p-8 rounded-lg text-center space-y-4">
+        <p className="text-lg text-foreground/90">
+          What I've learned: <span className="text-primary">The best developers aren't the ones who know everything—they're the ones who never stop being curious.</span>
         </p>
-        <p className="text-sm text-muted-foreground mt-2">— Steve Jobs</p>
+        <p className="text-sm text-muted-foreground italic">
+          Still breaking things. Still learning. Still loving it.
+        </p>
       </div>
     </div>
   );

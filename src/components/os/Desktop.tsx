@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { FileText, Code, Briefcase, FolderOpen, Map, Mail } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { FileText, Code, Briefcase, FolderOpen, Map, Mail, Copy, RefreshCw, Trash2 } from 'lucide-react';
 import DesktopIcon from './DesktopIcon';
 import Window from './Window';
 import Taskbar from './Taskbar';
@@ -14,8 +14,15 @@ interface DesktopProps {
   onExit: () => void;
 }
 
+interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+}
+
 const Desktop = ({ onExit }: DesktopProps) => {
   const [activeWindow, setActiveWindow] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>({ visible: false, x: 0, y: 0 });
 
   const icons = [
     { id: 'resume', icon: FileText, label: 'Resume.pdf' },
@@ -25,6 +32,53 @@ const Desktop = ({ onExit }: DesktopProps) => {
     { id: 'journey', icon: Map, label: 'My Journey' },
     { id: 'contact', icon: Mail, label: 'Contact' },
   ];
+
+  // Play subtle sound on window open
+  const playOpenSound = useCallback(() => {
+    // Create a subtle click sound using Web Audio API
+    try {
+      const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+      gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } catch {
+      // Audio not supported, fail silently
+    }
+  }, []);
+
+  const handleOpenWindow = (id: string) => {
+    setActiveWindow(id);
+    playOpenSound();
+  };
+
+  // Context menu handler
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
+
+  // Close context menu on click
+  useEffect(() => {
+    const handleClick = () => setContextMenu({ ...contextMenu, visible: false });
+    if (contextMenu.visible) {
+      window.addEventListener('click', handleClick);
+      return () => window.removeEventListener('click', handleClick);
+    }
+  }, [contextMenu.visible]);
 
   const renderWindow = () => {
     switch (activeWindow) {
@@ -58,7 +112,10 @@ const Desktop = ({ onExit }: DesktopProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-background animate-fade-in overflow-hidden">
+    <div 
+      className="fixed inset-0 bg-background animate-fade-in overflow-hidden"
+      onContextMenu={handleContextMenu}
+    >
       {/* Desktop Background Pattern */}
       <div className="absolute inset-0 bg-gradient-dark opacity-80" />
       <div 
@@ -76,7 +133,7 @@ const Desktop = ({ onExit }: DesktopProps) => {
             key={item.id}
             icon={item.icon}
             label={item.label}
-            onClick={() => setActiveWindow(item.id)}
+            onClick={() => handleOpenWindow(item.id)}
             isActive={activeWindow === item.id}
           />
         ))}
@@ -91,10 +148,36 @@ const Desktop = ({ onExit }: DesktopProps) => {
         {renderWindow()}
       </Window>
 
+      {/* Context Menu */}
+      {contextMenu.visible && (
+        <div 
+          className="fixed glass-strong rounded-lg py-2 min-w-[180px] z-50 animate-scale-in"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+        >
+          <button className="w-full px-4 py-2 text-sm text-left hover:bg-primary/10 flex items-center gap-3 transition-colors">
+            <RefreshCw size={14} className="text-muted-foreground" />
+            Refresh
+          </button>
+          <button className="w-full px-4 py-2 text-sm text-left hover:bg-primary/10 flex items-center gap-3 transition-colors">
+            <Copy size={14} className="text-muted-foreground" />
+            Copy
+          </button>
+          <div className="border-t border-border/50 my-1" />
+          <button className="w-full px-4 py-2 text-sm text-left hover:bg-primary/10 flex items-center gap-3 transition-colors text-muted-foreground">
+            <Trash2 size={14} />
+            Delete (disabled)
+          </button>
+          <div className="border-t border-border/50 my-1" />
+          <div className="px-4 py-2 text-xs text-muted-foreground">
+            Portfolio OS v1.0
+          </div>
+        </div>
+      )}
+
       {/* Taskbar */}
       <Taskbar
         activeWindow={activeWindow}
-        onIconClick={(id) => setActiveWindow(id)}
+        onIconClick={handleOpenWindow}
         onHomeClick={onExit}
       />
     </div>
