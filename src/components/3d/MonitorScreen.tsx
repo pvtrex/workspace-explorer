@@ -16,13 +16,13 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
   }
 
   return (
-    <group ref={htmlRef} position={[0, 1.15, -0.27]}>
+    <group ref={htmlRef} position={[0, 1.15, -0.275]}>
       <Html
         transform
-        distanceFactor={0.8}
+        distanceFactor={0.75}
         position={[0, 0, 0]}
         rotation={[0, 0, 0]}
-        scale={0.07}
+        scale={0.065}
         occlude="blending"
         style={{
           width: '1024px',

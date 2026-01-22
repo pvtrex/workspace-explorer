@@ -48,11 +48,24 @@ const InteractiveKeyboard = ({ isInteractive }: InteractiveKeyboardProps) => {
   });
 
   return (
-    <group position={[0, 0.78, 0.2]}>
-      {/* Keyboard base */}
+    <group position={[0.05, 0.63, 0.12]}>
+      {/* Keyboard base - matte plastic with slight texture */}
       <mesh castShadow>
-        <boxGeometry args={[0.45, 0.02, 0.15]} />
-        <meshStandardMaterial color="#1a1a2e" metalness={0.4} roughness={0.6} />
+        <boxGeometry args={[0.38, 0.018, 0.13]} />
+        <meshStandardMaterial 
+          color="#18181f" 
+          metalness={0.15} 
+          roughness={0.75}
+        />
+      </mesh>
+      {/* Palm rest area */}
+      <mesh position={[0, 0.001, 0.055]} castShadow>
+        <boxGeometry args={[0.36, 0.016, 0.025]} />
+        <meshStandardMaterial 
+          color="#1f1f28" 
+          metalness={0.1} 
+          roughness={0.85}
+        />
       </mesh>
       {/* Keys */}
       {Array.from({ length: 4 }).map((_, row) =>
@@ -64,21 +77,30 @@ const InteractiveKeyboard = ({ isInteractive }: InteractiveKeyboardProps) => {
               ref={(el) => {
                 if (el) keysRef.current.set(key, el);
               }}
-              position={[-0.18 + col * 0.04, 0.015, -0.05 + row * 0.035]}
+              position={[-0.15 + col * 0.034, 0.015, -0.04 + row * 0.028]}
               castShadow
             >
-              <boxGeometry args={[0.03, 0.008, 0.025]} />
+              <boxGeometry args={[0.026, 0.007, 0.022]} />
               <meshStandardMaterial 
-                color={pressedKeys[key] ? '#00d4ff' : '#2a2a3e'} 
-                metalness={0.3} 
-                roughness={0.7}
+                color={pressedKeys[key] ? '#00d4ff' : '#252530'} 
+                metalness={0.2} 
+                roughness={0.65}
                 emissive={pressedKeys[key] ? '#00d4ff' : '#000000'}
-                emissiveIntensity={pressedKeys[key] ? 0.3 : 0}
+                emissiveIntensity={pressedKeys[key] ? 0.4 : 0}
               />
             </mesh>
           );
         })
       )}
+      {/* LED indicator lights */}
+      <mesh position={[0.16, 0.015, -0.05]}>
+        <boxGeometry args={[0.004, 0.003, 0.004]} />
+        <meshStandardMaterial 
+          color="#00ff88" 
+          emissive="#00ff88" 
+          emissiveIntensity={0.8}
+        />
+      </mesh>
     </group>
   );
 };
