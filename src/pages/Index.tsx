@@ -3,7 +3,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import LoadingScreen from '@/components/LoadingScreen';
 import LandingSection from '@/components/LandingSection';
-import Desktop from '@/components/os/Desktop';
 
 // Lazy load the 3D scene for better initial load
 const Scene = lazy(() => import('@/components/3d/Scene'));
@@ -39,6 +38,7 @@ const Index = () => {
         if (progress < 0.3) {
           setShowLandingText(true);
           setScreenOn(false);
+          setShowDesktop(false);
         } else {
           setShowLandingText(false);
         }
@@ -46,38 +46,40 @@ const Index = () => {
         // Phase 2: Zoom to monitor (30-70%)
         if (progress >= 0.3 && progress < 0.7) {
           const zoomProgress = (progress - 0.3) / 0.4;
+          // Camera moves closer but stops at a minimum distance to keep scene visible
           const newPos: [number, number, number] = [
             3 - zoomProgress * 2.5,
-            2.5 - zoomProgress * 1.3,
-            4 - zoomProgress * 3.2,
+            2.5 - zoomProgress * 1.2,
+            4 - zoomProgress * 2.5, // Will be clamped by minZ in Scene
           ];
           const newLookAt: [number, number, number] = [
             0,
-            1 + zoomProgress * 0.15,
-            0 - zoomProgress * 0.3,
+            1 + zoomProgress * 0.1,
+            0 - zoomProgress * 0.2,
           ];
           setCameraState({ position: newPos, lookAt: newLookAt });
           setIsAnimating(true);
         }
 
-        // Phase 3: Enter desktop (70%+)
+        // Phase 3: Turn screen on (70%+)
         if (progress >= 0.7) {
           setScreenOn(true);
         }
 
-        // Phase 4: Full desktop mode (90%+)
-        if (progress >= 0.9 && !showDesktop) {
+        // Phase 4: Show desktop UI inside monitor (85%+)
+        if (progress >= 0.85) {
           setShowDesktop(true);
+        } else {
+          setShowDesktop(false);
         }
       };
 
       window.addEventListener('scroll', handleScroll);
       return () => window.removeEventListener('scroll', handleScroll);
     }
-  }, [isLoading, showDesktop]);
+  }, [isLoading]);
 
   const handleExitDesktop = () => {
-    setShowDesktop(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => {
       setCameraState({
@@ -85,16 +87,13 @@ const Index = () => {
         lookAt: [0, 1, 0],
       });
       setScreenOn(false);
+      setShowDesktop(false);
       setShowLandingText(true);
     }, 500);
   };
 
   if (isLoading) {
     return <LoadingScreen onComplete={() => setIsLoading(false)} />;
-  }
-
-  if (showDesktop) {
-    return <Desktop onExit={handleExitDesktop} />;
   }
 
   return (
@@ -104,7 +103,7 @@ const Index = () => {
 
       {/* Fixed viewport for 3D scene */}
       <div className="fixed inset-0">
-        {/* 3D Scene */}
+        {/* 3D Scene with embedded Desktop */}
         <Suspense
           fallback={
             <div className="w-full h-full bg-background flex items-center justify-center">
@@ -119,6 +118,9 @@ const Index = () => {
             cameraLookAt={cameraState.lookAt}
             isAnimating={isAnimating}
             screenOn={screenOn}
+            enableMouseParallax={!showDesktop}
+            showDesktop={showDesktop}
+            onExitDesktop={handleExitDesktop}
           />
         </Suspense>
 
@@ -138,9 +140,21 @@ const Index = () => {
         {/* Progress indicator */}
         <div className="absolute bottom-4 right-4 text-xs font-mono text-muted-foreground">
           {screenOn && !showDesktop && (
-            <span className="text-primary">Keep scrolling to enter...</span>
+            <span className="text-primary">Keep scrolling to enter workspace...</span>
           )}
         </div>
+
+        {/* Exit hint when desktop is active */}
+        {showDesktop && (
+          <div className="absolute top-4 left-4 z-50">
+            <button
+              onClick={handleExitDesktop}
+              className="px-3 py-1.5 text-xs font-mono bg-background/80 backdrop-blur-sm border border-primary/30 rounded text-primary hover:bg-primary/10 transition-colors"
+            >
+              ← Scroll up to exit
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
