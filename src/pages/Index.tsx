@@ -34,44 +34,54 @@ const Index = () => {
         const progress = Math.min(scrollY / windowHeight, 1);
         scrollProgress.current = progress;
 
-        // Phase 1: Hide text (0-30%)
-        if (progress < 0.3) {
+        // Phase 1: Show/Hide landing text based on scroll position (reversible)
+        if (progress < 0.25) {
           setShowLandingText(true);
-          setScreenOn(false);
-          setShowDesktop(false);
         } else {
           setShowLandingText(false);
         }
 
-        // Phase 2: Zoom to monitor (30-70%)
-        if (progress >= 0.3 && progress < 0.7) {
-          const zoomProgress = (progress - 0.3) / 0.4;
+        // Phase 2: Zoom to monitor (25-60%)
+        if (progress >= 0.25 && progress < 0.6) {
+          const zoomProgress = (progress - 0.25) / 0.35;
           // Camera moves closer but stops at a minimum distance to keep scene visible
           const newPos: [number, number, number] = [
-            3 - zoomProgress * 2.5,
-            2.5 - zoomProgress * 1.2,
-            4 - zoomProgress * 2.5, // Will be clamped by minZ in Scene
+            3 - zoomProgress * 2.2,
+            2.5 - zoomProgress * 1.0,
+            4 - zoomProgress * 2.0,
           ];
           const newLookAt: [number, number, number] = [
             0,
-            1 + zoomProgress * 0.1,
-            0 - zoomProgress * 0.2,
+            1.15 + zoomProgress * 0.05,
+            0 - zoomProgress * 0.15,
           ];
           setCameraState({ position: newPos, lookAt: newLookAt });
           setIsAnimating(true);
+        } else if (progress < 0.25) {
+          // Reset camera when scrolling back to top
+          setCameraState({
+            position: [3, 2.5, 4],
+            lookAt: [0, 1, 0],
+          });
+          setIsAnimating(true);
         }
 
-        // Phase 3: Turn screen on (70%+)
-        if (progress >= 0.7) {
+        // Phase 3: Turn screen on (55%+) - stays on once activated
+        if (progress >= 0.55) {
           setScreenOn(true);
+        } else if (progress < 0.3) {
+          // Only turn off when scrolling back near the top
+          setScreenOn(false);
         }
 
-        // Phase 4: Show desktop UI inside monitor (85%+)
-        if (progress >= 0.85) {
+        // Phase 4: Show desktop UI inside monitor (70%+) - PERSISTENT once shown
+        if (progress >= 0.7) {
           setShowDesktop(true);
-        } else {
+        } else if (progress < 0.4) {
+          // Only hide when scrolling significantly back up
           setShowDesktop(false);
         }
+        // Between 0.4 and 0.7, keep the current state (persists desktop if already shown)
       };
 
       window.addEventListener('scroll', handleScroll);

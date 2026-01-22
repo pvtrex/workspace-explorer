@@ -73,26 +73,55 @@ const CameraController = ({
 const Lights = () => {
   return (
     <>
-      <ambientLight intensity={0.2} />
+      {/* Ambient - very low, just to avoid pitch black */}
+      <ambientLight intensity={0.08} color="#1a1a2e" />
+      
+      {/* Key Light - Main directional, soft shadows */}
       <directionalLight
-        position={[5, 8, 5]}
-        intensity={0.5}
+        position={[3, 6, 4]}
+        intensity={0.6}
         castShadow
         shadow-mapSize={[2048, 2048]}
-        shadow-camera-far={50}
-        shadow-camera-left={-10}
-        shadow-camera-right={10}
-        shadow-camera-top={10}
-        shadow-camera-bottom={-10}
+        shadow-camera-far={20}
+        shadow-camera-left={-5}
+        shadow-camera-right={5}
+        shadow-camera-top={5}
+        shadow-camera-bottom={-5}
+        shadow-bias={-0.0001}
+        color="#fff8f0"
       />
-      <pointLight position={[-2, 3, 2]} intensity={0.3} color="#00d4ff" />
-      <pointLight position={[2, 2, -1]} intensity={0.2} color="#a855f7" />
+      
+      {/* Fill Light - Softer, from the side */}
+      <directionalLight
+        position={[-3, 4, 2]}
+        intensity={0.15}
+        color="#e0e8ff"
+      />
+      
+      {/* Rim Light - Back light for depth separation */}
+      <directionalLight
+        position={[0, 3, -4]}
+        intensity={0.25}
+        color="#8090ff"
+      />
+      
+      {/* Accent lights - Subtle colored atmosphere */}
+      <pointLight position={[-1.5, 2, 1]} intensity={0.15} color="#00d4ff" distance={4} decay={2} />
+      <pointLight position={[1.5, 1.5, -0.5]} intensity={0.08} color="#a855f7" distance={3} decay={2} />
+      
+      {/* Monitor glow light - activated when screen is on */}
+      <pointLight position={[0, 1.2, 0]} intensity={0.1} color="#00d4ff" distance={2} decay={2} />
+      
+      {/* Spot on desk area for focus */}
       <spotLight
-        position={[0, 4, 0]}
-        angle={0.5}
-        penumbra={1}
-        intensity={0.4}
+        position={[0, 3.5, 1]}
+        angle={0.4}
+        penumbra={0.8}
+        intensity={0.35}
         castShadow
+        shadow-bias={-0.0001}
+        color="#fff5e6"
+        target-position={[0, 0.8, 0]}
       />
     </>
   );
@@ -169,7 +198,7 @@ const Scene = ({
           far={4}
         />
         <Environment preset="night" />
-        <fog attach="fog" args={['#0a0a12', 5, 20]} />
+        <fog attach="fog" args={['#05050a', 4, 15]} />
       </Suspense>
     </Canvas>
   );
