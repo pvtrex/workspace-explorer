@@ -2,6 +2,7 @@ import { Suspense, useRef, useEffect, useState } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { Environment, ContactShadows } from '@react-three/drei';
 import { WorkspaceScene } from './WorkspaceScene';
+import MonitorScreen from './MonitorScreen';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -11,6 +12,7 @@ interface CameraControllerProps {
   isAnimating: boolean;
   mousePosition: { x: number; y: number };
   enableMouseParallax: boolean;
+  minZ: number;
 }
 
 const CameraController = ({ 
@@ -18,19 +20,28 @@ const CameraController = ({
   targetLookAt, 
   isAnimating, 
   mousePosition,
-  enableMouseParallax 
+  enableMouseParallax,
+  minZ
 }: CameraControllerProps) => {
   const { camera } = useThree();
   const lookAtTarget = useRef(new THREE.Vector3(0, 1, 0));
   const basePosition = useRef(new THREE.Vector3(...targetPosition));
 
   useEffect(() => {
-    basePosition.current.set(...targetPosition);
+    // Clamp the Z position to never go closer than minZ
+    const clampedZ = Math.max(targetPosition[2], minZ);
+    const clampedPosition: [number, number, number] = [
+      targetPosition[0],
+      targetPosition[1],
+      clampedZ
+    ];
+    
+    basePosition.current.set(...clampedPosition);
     if (isAnimating) {
       gsap.to(camera.position, {
-        x: targetPosition[0],
-        y: targetPosition[1],
-        z: targetPosition[2],
+        x: clampedPosition[0],
+        y: clampedPosition[1],
+        z: clampedPosition[2],
         duration: 2,
         ease: 'power2.inOut',
       });
@@ -42,7 +53,7 @@ const CameraController = ({
         ease: 'power2.inOut',
       });
     }
-  }, [targetPosition, targetLookAt, isAnimating, camera]);
+  }, [targetPosition, targetLookAt, isAnimating, camera, minZ]);
 
   useFrame(() => {
     // Add subtle mouse parallax when enabled
@@ -93,6 +104,8 @@ interface SceneProps {
   isAnimating?: boolean;
   screenOn?: boolean;
   enableMouseParallax?: boolean;
+  showDesktop?: boolean;
+  onExitDesktop?: () => void;
 }
 
 const Scene = ({
@@ -101,6 +114,8 @@ const Scene = ({
   isAnimating = false,
   screenOn = false,
   enableMouseParallax = true,
+  showDesktop = false,
+  onExitDesktop = () => {},
 }: SceneProps) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
@@ -112,12 +127,12 @@ const Scene = ({
       setMousePosition({ x, y });
     };
 
-    if (enableMouseParallax) {
-      window.addEventListener('mousemove', handleMouseMove);
-    }
-
+    window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [enableMouseParallax]);
+  }, []);
+
+  // Minimum Z distance - camera will never go closer than this
+  const MIN_CAMERA_Z = 1.2;
 
   return (
     <Canvas
@@ -133,9 +148,19 @@ const Scene = ({
           isAnimating={isAnimating}
           mousePosition={mousePosition}
           enableMouseParallax={enableMouseParallax && !isAnimating}
+          minZ={MIN_CAMERA_Z}
         />
         <Lights />
-        <WorkspaceScene screenOn={screenOn} />
+        <WorkspaceScene 
+          screenOn={screenOn} 
+          mousePosition={mousePosition}
+          isInteractive={showDesktop}
+        />
+        {/* Monitor screen with embedded Desktop UI */}
+        <MonitorScreen 
+          isActive={showDesktop} 
+          onExit={onExitDesktop} 
+        />
         <ContactShadows
           position={[0, 0, 0]}
           opacity={0.5}

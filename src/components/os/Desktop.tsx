@@ -12,6 +12,7 @@ import ContactWindow from './windows/ContactWindow';
 
 interface DesktopProps {
   onExit: () => void;
+  isEmbedded?: boolean;
 }
 
 interface ContextMenuState {
@@ -20,7 +21,7 @@ interface ContextMenuState {
   y: number;
 }
 
-const Desktop = ({ onExit }: DesktopProps) => {
+const Desktop = ({ onExit, isEmbedded = false }: DesktopProps) => {
   const [activeWindow, setActiveWindow] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({ visible: false, x: 0, y: 0 });
 
@@ -113,7 +114,7 @@ const Desktop = ({ onExit }: DesktopProps) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-background animate-fade-in overflow-hidden"
+      className={`${isEmbedded ? 'absolute inset-0' : 'fixed inset-0'} bg-background animate-fade-in overflow-hidden`}
       onContextMenu={handleContextMenu}
     >
       {/* Desktop Background Pattern */}
