@@ -13,6 +13,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showDesktop, setShowDesktop] = useState(false);
   const [showLandingText, setShowLandingText] = useState(true);
+  const [introTextShown, setIntroTextShown] = useState(false); // One-time flag
   const [cameraState, setCameraState] = useState<{
     position: [number, number, number];
     lookAt: [number, number, number];
@@ -34,10 +35,9 @@ const Index = () => {
         const progress = Math.min(scrollY / windowHeight, 1);
         scrollProgress.current = progress;
 
-        // Phase 1: Show/Hide landing text based on scroll position (reversible)
-        if (progress < 0.25) {
-          setShowLandingText(true);
-        } else {
+        // Phase 1: Hide landing text once user scrolls down (ONE-TIME, never comes back)
+        if (progress > 0.15 && !introTextShown) {
+          setIntroTextShown(true); // Mark as shown forever
           setShowLandingText(false);
         }
 
