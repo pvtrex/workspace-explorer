@@ -73,13 +73,13 @@ const CameraController = ({
 const Lights = () => {
   return (
     <>
-      {/* Ambient - very low, just to avoid pitch black */}
-      <ambientLight intensity={0.08} color="#1a1a2e" />
+      {/* Ambient - slightly higher for visibility */}
+      <ambientLight intensity={0.15} color="#1a1a3e" />
       
-      {/* Key Light - Main directional, soft shadows */}
+      {/* Key Light - Main directional, brighter and warmer */}
       <directionalLight
-        position={[3, 6, 4]}
-        intensity={0.6}
+        position={[4, 7, 5]}
+        intensity={1.0}
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-far={20}
@@ -91,37 +91,57 @@ const Lights = () => {
         color="#fff8f0"
       />
       
-      {/* Fill Light - Softer, from the side */}
+      {/* Fill Light - Stronger to reduce harsh shadows */}
       <directionalLight
-        position={[-3, 4, 2]}
-        intensity={0.15}
+        position={[-4, 5, 3]}
+        intensity={0.4}
         color="#e0e8ff"
       />
       
-      {/* Rim Light - Back light for depth separation */}
+      {/* Rim Light - Enhanced for better depth separation */}
       <directionalLight
-        position={[0, 3, -4]}
-        intensity={0.25}
-        color="#8090ff"
+        position={[0, 4, -5]}
+        intensity={0.5}
+        color="#6080ff"
       />
       
-      {/* Accent lights - Subtle colored atmosphere */}
-      <pointLight position={[-1.5, 2, 1]} intensity={0.15} color="#00d4ff" distance={4} decay={2} />
-      <pointLight position={[1.5, 1.5, -0.5]} intensity={0.08} color="#a855f7" distance={3} decay={2} />
+      {/* Secondary rim from side */}
+      <directionalLight
+        position={[-3, 2, -3]}
+        intensity={0.25}
+        color="#8060ff"
+      />
       
-      {/* Monitor glow light - activated when screen is on */}
-      <pointLight position={[0, 1.2, 0]} intensity={0.1} color="#00d4ff" distance={2} decay={2} />
+      {/* Accent lights - Cyan workspace glow */}
+      <pointLight position={[-1.5, 2.5, 1.5]} intensity={0.3} color="#00d4ff" distance={5} decay={2} />
+      <pointLight position={[2, 2, 0]} intensity={0.15} color="#a855f7" distance={4} decay={2} />
       
-      {/* Spot on desk area for focus */}
+      {/* Monitor glow - stronger when visible */}
+      <pointLight position={[0, 1.3, 0.3]} intensity={0.25} color="#00d4ff" distance={2.5} decay={2} />
+      
+      {/* Under-desk accent */}
+      <pointLight position={[0, 0.2, 0.5]} intensity={0.1} color="#00d4ff" distance={2} decay={2} />
+      
+      {/* Main spotlight on workspace - brighter */}
       <spotLight
-        position={[0, 3.5, 1]}
-        angle={0.4}
-        penumbra={0.8}
-        intensity={0.35}
+        position={[0, 5, 2]}
+        angle={0.5}
+        penumbra={0.7}
+        intensity={0.8}
         castShadow
         shadow-bias={-0.0001}
-        color="#fff5e6"
+        color="#fff8f0"
         target-position={[0, 0.8, 0]}
+      />
+      
+      {/* Secondary spot for monitor area */}
+      <spotLight
+        position={[0, 3, -1]}
+        angle={0.4}
+        penumbra={0.8}
+        intensity={0.3}
+        color="#e0f0ff"
+        target-position={[0, 1.2, -0.3]}
       />
     </>
   );
@@ -198,7 +218,8 @@ const Scene = ({
           far={4}
         />
         <Environment preset="night" />
-        <fog attach="fog" args={['#05050a', 4, 15]} />
+        {/* Lighter fog for better visibility */}
+        <fog attach="fog" args={['#080812', 6, 18]} />
       </Suspense>
     </Canvas>
   );
