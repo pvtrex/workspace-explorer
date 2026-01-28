@@ -18,10 +18,11 @@ const LandingSection = ({ isVisible }: LandingSectionProps) => {
           ease: 'power2.out',
         });
       } else {
+        // Animate out and stay hidden (one-time, no reverse)
         gsap.to(containerRef.current, {
           opacity: 0,
-          x: -50,
-          duration: 0.6,
+          x: -100,
+          duration: 0.8,
           ease: 'power2.in',
         });
       }
