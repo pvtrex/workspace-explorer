@@ -13,8 +13,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showDesktop, setShowDesktop] = useState(false);
   const [showLandingText, setShowLandingText] = useState(true);
-  const [introTextShown, setIntroTextShown] = useState(false); // One-time flag - never shows again
-  const [animationComplete, setAnimationComplete] = useState(false); // Track when scroll animation is done
+  const [introTextShown, setIntroTextShown] = useState(false);
   const [cameraState, setCameraState] = useState<{
     position: [number, number, number];
     lookAt: [number, number, number];
@@ -26,27 +25,28 @@ const Index = () => {
   const [screenOn, setScreenOn] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const desktopActivated = useRef(false); // Persistent flag - desktop stays on once activated
-  const scrollProgress = useRef(0);
+  const desktopActivatedRef = useRef(false);
 
   useEffect(() => {
     if (!isLoading && containerRef.current) {
       const handleScroll = () => {
         const scrollY = window.scrollY;
-        const windowHeight = window.innerHeight;
-        const progress = Math.min(scrollY / windowHeight, 1);
-        scrollProgress.current = progress;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        // Calculate progress based on total scrollable distance
+        const progress = maxScroll > 0 ? Math.min(scrollY / maxScroll, 1) : 0;
 
-        // Phase 1: Hide landing text once user scrolls down (ONE-TIME, never comes back)
-        if (progress > 0.15 && !introTextShown) {
-          setIntroTextShown(true); // Mark as shown forever
+        console.log('[Scroll] Progress:', progress.toFixed(2), 'ScrollY:', scrollY, 'MaxScroll:', maxScroll);
+
+        // Phase 1: Hide landing text once user scrolls down (ONE-TIME)
+        if (progress > 0.1 && !introTextShown) {
+          setIntroTextShown(true);
           setShowLandingText(false);
+          console.log('[Scroll] Landing text hidden (one-time)');
         }
 
-        // Phase 2: Zoom to monitor (25-60%)
-        if (progress >= 0.25 && progress < 0.6) {
-          const zoomProgress = (progress - 0.25) / 0.35;
-          // Camera moves closer but stops at a minimum distance to keep scene visible
+        // Phase 2: Zoom to monitor (15-50%)
+        if (progress >= 0.15 && progress < 0.5) {
+          const zoomProgress = (progress - 0.15) / 0.35;
           const newPos: [number, number, number] = [
             3 - zoomProgress * 2.2,
             2.5 - zoomProgress * 1.0,
@@ -59,8 +59,7 @@ const Index = () => {
           ];
           setCameraState({ position: newPos, lookAt: newLookAt });
           setIsAnimating(true);
-        } else if (progress < 0.25 && !desktopActivated.current) {
-          // Reset camera when scrolling back to top (only if desktop not yet activated)
+        } else if (progress < 0.15 && !desktopActivatedRef.current) {
           setCameraState({
             position: [3, 2.5, 4],
             lookAt: [0, 1, 0],
@@ -68,35 +67,35 @@ const Index = () => {
           setIsAnimating(true);
         }
 
-        // Phase 3: Animation complete detection (60%+)
-        if (progress >= 0.6) {
-          setAnimationComplete(true);
-        }
-
-        // Phase 4: Turn screen on (55%+) - PERMANENT once activated
-        if (progress >= 0.55) {
-          setScreenOn(true);
-        } else if (progress < 0.2 && !desktopActivated.current) {
-          // Only turn off if desktop was never activated
+        // Phase 3: Turn screen on (40%+)
+        if (progress >= 0.4) {
+          if (!screenOn) {
+            console.log('[Scroll] Screen turning ON');
+            setScreenOn(true);
+          }
+        } else if (progress < 0.15 && !desktopActivatedRef.current) {
           setScreenOn(false);
         }
 
-        // Phase 5: Show desktop UI inside monitor (70%+) - PERMANENT once shown
-        if (progress >= 0.7) {
-          desktopActivated.current = true; // Mark as permanently activated
+        // Phase 4: Show desktop UI inside monitor (55%+) - PERMANENT
+        if (progress >= 0.55 && !desktopActivatedRef.current) {
+          console.log('[Scroll] ACTIVATING DESKTOP - Animation complete!');
+          desktopActivatedRef.current = true;
           setShowDesktop(true);
         }
-        // Desktop NEVER hides once activated - this is the main interaction surface
       };
 
-      window.addEventListener('scroll', handleScroll);
+      // Initial call to set state based on current scroll position
+      handleScroll();
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
       return () => window.removeEventListener('scroll', handleScroll);
     }
-  }, [isLoading, introTextShown]);
+  }, [isLoading, introTextShown, screenOn]);
 
   const handleExitDesktop = () => {
-    // Reset the activation flag so user can start fresh
-    desktopActivated.current = false;
+    console.log('[Exit] Resetting to initial state');
+    desktopActivatedRef.current = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => {
       setCameraState({
@@ -105,8 +104,6 @@ const Index = () => {
       });
       setScreenOn(false);
       setShowDesktop(false);
-      setAnimationComplete(false);
-      // Note: introTextShown stays true - intro text is ONE-TIME only
     }, 500);
   };
 
@@ -117,7 +114,7 @@ const Index = () => {
   return (
     <div ref={containerRef} className="relative">
       {/* Scroll container - creates scroll space */}
-      <div className="h-[300vh]" />
+      <div className="h-[250vh]" />
 
       {/* Fixed viewport for 3D scene */}
       <div className="fixed inset-0">
@@ -155,10 +152,13 @@ const Index = () => {
           </div>
         )}
 
-        {/* Progress indicator */}
-        <div className="absolute bottom-4 right-4 text-xs font-mono text-muted-foreground">
+        {/* Progress indicator - debug info */}
+        <div className="absolute bottom-4 right-4 text-xs font-mono text-muted-foreground space-y-1">
           {screenOn && !showDesktop && (
-            <span className="text-primary">Keep scrolling to enter workspace...</span>
+            <span className="text-primary block">Keep scrolling to enter workspace...</span>
+          )}
+          {showDesktop && (
+            <span className="text-primary block">✓ Desktop Active</span>
           )}
         </div>
 
@@ -169,7 +169,7 @@ const Index = () => {
               onClick={handleExitDesktop}
               className="px-3 py-1.5 text-xs font-mono bg-background/80 backdrop-blur-sm border border-primary/30 rounded text-primary hover:bg-primary/10 transition-colors"
             >
-              ← Scroll up to exit
+              ← Exit Desktop
             </button>
           </div>
         )}

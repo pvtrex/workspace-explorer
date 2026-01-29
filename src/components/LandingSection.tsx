@@ -11,6 +11,8 @@ const LandingSection = ({ isVisible }: LandingSectionProps) => {
   useEffect(() => {
     if (containerRef.current) {
       if (isVisible) {
+        containerRef.current.style.display = 'flex';
+        containerRef.current.style.pointerEvents = 'auto';
         gsap.to(containerRef.current, {
           opacity: 1,
           x: 0,
@@ -18,12 +20,18 @@ const LandingSection = ({ isVisible }: LandingSectionProps) => {
           ease: 'power2.out',
         });
       } else {
-        // Animate out and stay hidden (one-time, no reverse)
+        containerRef.current.style.pointerEvents = 'none';
+        // Animate out and then hide completely
         gsap.to(containerRef.current, {
           opacity: 0,
           x: -100,
-          duration: 0.8,
+          duration: 0.6,
           ease: 'power2.in',
+          onComplete: () => {
+            if (containerRef.current) {
+              containerRef.current.style.display = 'none';
+            }
+          }
         });
       }
     }
@@ -33,12 +41,13 @@ const LandingSection = ({ isVisible }: LandingSectionProps) => {
     <div
       ref={containerRef}
       className="absolute left-0 top-0 h-full w-full md:w-1/2 flex items-center justify-center p-8 z-10"
+      style={{ display: isVisible ? 'flex' : 'none' }}
     >
       <div className="max-w-lg space-y-6">
         {/* Greeting */}
         <div className="space-y-2">
           <p className="text-primary font-mono text-sm tracking-wider animate-fade-in flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
             Available for opportunities
           </p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
