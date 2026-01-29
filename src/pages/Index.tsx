@@ -13,7 +13,8 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showDesktop, setShowDesktop] = useState(false);
   const [showLandingText, setShowLandingText] = useState(true);
-  const [introTextShown, setIntroTextShown] = useState(false); // One-time flag
+  const [introTextShown, setIntroTextShown] = useState(false); // One-time flag - never shows again
+  const [animationComplete, setAnimationComplete] = useState(false); // Track when scroll animation is done
   const [cameraState, setCameraState] = useState<{
     position: [number, number, number];
     lookAt: [number, number, number];
@@ -25,6 +26,7 @@ const Index = () => {
   const [screenOn, setScreenOn] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const desktopActivated = useRef(false); // Persistent flag - desktop stays on once activated
   const scrollProgress = useRef(0);
 
   useEffect(() => {
@@ -57,8 +59,8 @@ const Index = () => {
           ];
           setCameraState({ position: newPos, lookAt: newLookAt });
           setIsAnimating(true);
-        } else if (progress < 0.25) {
-          // Reset camera when scrolling back to top
+        } else if (progress < 0.25 && !desktopActivated.current) {
+          // Reset camera when scrolling back to top (only if desktop not yet activated)
           setCameraState({
             position: [3, 2.5, 4],
             lookAt: [0, 1, 0],
@@ -66,30 +68,35 @@ const Index = () => {
           setIsAnimating(true);
         }
 
-        // Phase 3: Turn screen on (55%+) - stays on once activated
+        // Phase 3: Animation complete detection (60%+)
+        if (progress >= 0.6) {
+          setAnimationComplete(true);
+        }
+
+        // Phase 4: Turn screen on (55%+) - PERMANENT once activated
         if (progress >= 0.55) {
           setScreenOn(true);
-        } else if (progress < 0.3) {
-          // Only turn off when scrolling back near the top
+        } else if (progress < 0.2 && !desktopActivated.current) {
+          // Only turn off if desktop was never activated
           setScreenOn(false);
         }
 
-        // Phase 4: Show desktop UI inside monitor (70%+) - PERSISTENT once shown
+        // Phase 5: Show desktop UI inside monitor (70%+) - PERMANENT once shown
         if (progress >= 0.7) {
+          desktopActivated.current = true; // Mark as permanently activated
           setShowDesktop(true);
-        } else if (progress < 0.4) {
-          // Only hide when scrolling significantly back up
-          setShowDesktop(false);
         }
-        // Between 0.4 and 0.7, keep the current state (persists desktop if already shown)
+        // Desktop NEVER hides once activated - this is the main interaction surface
       };
 
       window.addEventListener('scroll', handleScroll);
       return () => window.removeEventListener('scroll', handleScroll);
     }
-  }, [isLoading]);
+  }, [isLoading, introTextShown]);
 
   const handleExitDesktop = () => {
+    // Reset the activation flag so user can start fresh
+    desktopActivated.current = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => {
       setCameraState({
@@ -98,7 +105,8 @@ const Index = () => {
       });
       setScreenOn(false);
       setShowDesktop(false);
-      setShowLandingText(true);
+      setAnimationComplete(false);
+      // Note: introTextShown stays true - intro text is ONE-TIME only
     }, 500);
   };
 
