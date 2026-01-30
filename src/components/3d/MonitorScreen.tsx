@@ -42,73 +42,76 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
     return null;
   }
 
-  // Monitor screen dimensions from WorkspaceScene:
-  // Monitor frame at position [0, 1.15, -0.3] with screen size ~1.0 x 0.56 units
-  // Screen glass at z-offset +0.024, so we place our dedicated plane slightly in front to avoid z-fighting.
-  
   return (
-    <group ref={htmlRef} position={[0, 1.15, -0.266]}>
-      {/* Dedicated screen plane exactly matching the monitor's visible screen */}
-      <mesh position={[0, 0, 0]} renderOrder={999}>
-        <planeGeometry args={[1.0, 0.56]} />
-        <meshBasicMaterial transparent opacity={0} depthTest={false} depthWrite={false} />
-      </mesh>
-
+    <group ref={htmlRef} position={[0, 1.15, -0.22]}>
       <Html
         transform
-        occlude={false}
-        zIndexRange={[1000, 0]}
-        position={[0, 0, 0.001]}
+        distanceFactor={0.65}
+        position={[0, 0, 0]}
         rotation={[0, 0, 0]}
-        // Tune scale so 1024px ~= 1.0 world units (slightly oversized for readability)
-        scale={[0.00105, 0.00105, 0.00105]}
+        scale={0.06}
         prepend
         center
         style={{
           width: '1024px',
           height: '576px',
-          borderRadius: '4px',
+          borderRadius: '6px',
           overflow: 'hidden',
           pointerEvents: 'auto',
           userSelect: 'none',
+          background: '#0a0a12',
         }}
       >
-        <div
-          style={{
-            width: '1024px',
+        <div 
+          style={{ 
+            width: '1024px', 
             height: '576px',
             background: '#0a0a12',
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden',
           }}
         >
           {!isReady ? (
-            // Boot screen (high contrast for debug visibility)
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+            // Boot screen
+            <div 
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
                 justifyContent: 'center',
-                background: '#0b2cff',
+                background: '#0a0a12',
               }}
             >
-              <div
-                style={{
-                  color: '#ffffff',
-                  fontFamily: 'monospace',
-                  fontSize: '44px',
-                  marginBottom: '18px',
-                  letterSpacing: '3px',
+              <div 
+                style={{ 
+                  color: '#00d4ff', 
+                  fontFamily: 'monospace', 
+                  fontSize: '28px', 
+                  marginBottom: '24px',
+                  letterSpacing: '2px',
                 }}
+                className="animate-pulse"
               >
-                DESKTOP LOADING
+                Portfolio OS
               </div>
-              <div style={{ color: '#ffffff', fontFamily: 'monospace', fontSize: '16px', opacity: 0.9 }}>
-                (debug mode: ensuring fullscreen visibility)
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    style={{ 
+                      width: '12px', 
+                      height: '12px', 
+                      borderRadius: '50%',
+                      background: '#00d4ff',
+                      animation: `bounce 0.6s infinite ${i * 100}ms`,
+                    }}
+                  />
+                ))}
+              </div>
+              <div style={{ color: '#6b7280', fontFamily: 'monospace', fontSize: '14px' }}>
+                Initializing workspace...
               </div>
             </div>
           ) : (
