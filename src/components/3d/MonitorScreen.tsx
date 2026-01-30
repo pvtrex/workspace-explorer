@@ -44,16 +44,24 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
 
   // Monitor screen dimensions from WorkspaceScene:
   // Monitor frame at position [0, 1.15, -0.3] with screen size ~1.0 x 0.56 units
-  // Screen glass at z-offset +0.024, we position just in front at +0.08
+  // Screen glass at z-offset +0.024, so we place our dedicated plane slightly in front to avoid z-fighting.
   
   return (
-    <group ref={htmlRef} position={[0, 1.15, -0.22]}>
+    <group ref={htmlRef} position={[0, 1.15, -0.266]}>
+      {/* Dedicated screen plane exactly matching the monitor's visible screen */}
+      <mesh position={[0, 0, 0]} renderOrder={999}>
+        <planeGeometry args={[1.0, 0.56]} />
+        <meshBasicMaterial transparent opacity={0} depthTest={false} depthWrite={false} />
+      </mesh>
+
       <Html
         transform
-        distanceFactor={1}
-        position={[0, 0, 0]}
+        occlude={false}
+        zIndexRange={[1000, 0]}
+        position={[0, 0, 0.001]}
         rotation={[0, 0, 0]}
-        scale={[0.00098, 0.00098, 0.00098]}
+        // Tune scale so 1024px ~= 1.0 world units (slightly oversized for readability)
+        scale={[0.00105, 0.00105, 0.00105]}
         prepend
         center
         style={{
@@ -65,9 +73,9 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
           userSelect: 'none',
         }}
       >
-        <div 
-          style={{ 
-            width: '1024px', 
+        <div
+          style={{
+            width: '1024px',
             height: '576px',
             background: '#0a0a12',
             display: 'flex',
@@ -76,54 +84,32 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
           }}
         >
           {!isReady ? (
-            // Boot screen
-            <div 
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
+            // Boot screen (high contrast for debug visibility)
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #0a0a12 0%, #0d1020 50%, #0a0a12 100%)',
+                background: '#0b2cff',
               }}
             >
-              <div 
-                style={{ 
-                  color: '#00d4ff', 
-                  fontFamily: 'monospace', 
-                  fontSize: '32px', 
-                  marginBottom: '32px',
-                  letterSpacing: '4px',
-                  textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
+              <div
+                style={{
+                  color: '#ffffff',
+                  fontFamily: 'monospace',
+                  fontSize: '44px',
+                  marginBottom: '18px',
+                  letterSpacing: '3px',
                 }}
               >
-                Portfolio OS
+                DESKTOP LOADING
               </div>
-              <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    style={{ 
-                      width: '16px', 
-                      height: '16px', 
-                      borderRadius: '50%',
-                      background: '#00d4ff',
-                      boxShadow: '0 0 10px rgba(0, 212, 255, 0.5)',
-                      animation: `pulse 1s infinite ${i * 150}ms`,
-                    }}
-                  />
-                ))}
+              <div style={{ color: '#ffffff', fontFamily: 'monospace', fontSize: '16px', opacity: 0.9 }}>
+                (debug mode: ensuring fullscreen visibility)
               </div>
-              <div style={{ color: '#6b7280', fontFamily: 'monospace', fontSize: '16px' }}>
-                Initializing workspace...
-              </div>
-              <style>{`
-                @keyframes pulse {
-                  0%, 100% { opacity: 0.3; transform: scale(0.8); }
-                  50% { opacity: 1; transform: scale(1); }
-                }
-              `}</style>
             </div>
           ) : (
             <Desktop onExit={onExit} isEmbedded />
