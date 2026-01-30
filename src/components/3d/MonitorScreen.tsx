@@ -43,23 +43,26 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
   }
 
   return (
-    <group ref={htmlRef} position={[0, 1.15, -0.22]}>
+    <group ref={htmlRef} position={[0, 1.18, -0.18]}>
+      {/* Screen plane for visual reference - slightly behind the UI */}
+      <mesh position={[0, 0, -0.001]}>
+        <planeGeometry args={[0.52, 0.30]} />
+        <meshBasicMaterial color="#000000" />
+      </mesh>
+      
       <Html
         transform
-        distanceFactor={0.65}
-        position={[0, 0, 0]}
+        distanceFactor={0.28}
+        position={[0, 0, 0.001]}
         rotation={[0, 0, 0]}
-        scale={0.06}
-        prepend
-        center
+        zIndexRange={[100, 0]}
         style={{
           width: '1024px',
           height: '576px',
-          borderRadius: '6px',
+          borderRadius: '4px',
           overflow: 'hidden',
           pointerEvents: 'auto',
           userSelect: 'none',
-          background: '#0a0a12',
         }}
       >
         <div 
@@ -81,36 +84,37 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
                 flexDirection: 'column', 
                 alignItems: 'center', 
                 justifyContent: 'center',
-                background: '#0a0a12',
+                background: 'linear-gradient(135deg, #0a0a12 0%, #1a1a2e 100%)',
               }}
             >
               <div 
                 style={{ 
                   color: '#00d4ff', 
                   fontFamily: 'monospace', 
-                  fontSize: '28px', 
+                  fontSize: '32px', 
                   marginBottom: '24px',
-                  letterSpacing: '2px',
+                  letterSpacing: '3px',
+                  textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
                 }}
-                className="animate-pulse"
               >
                 Portfolio OS
               </div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
                 {[0, 1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
                     style={{ 
-                      width: '12px', 
-                      height: '12px', 
+                      width: '14px', 
+                      height: '14px', 
                       borderRadius: '50%',
                       background: '#00d4ff',
-                      animation: `bounce 0.6s infinite ${i * 100}ms`,
+                      opacity: 0.8,
+                      animation: `pulse 1s infinite ${i * 150}ms`,
                     }}
                   />
                 ))}
               </div>
-              <div style={{ color: '#6b7280', fontFamily: 'monospace', fontSize: '14px' }}>
+              <div style={{ color: '#8b8b9e', fontFamily: 'monospace', fontSize: '16px' }}>
                 Initializing workspace...
               </div>
             </div>
