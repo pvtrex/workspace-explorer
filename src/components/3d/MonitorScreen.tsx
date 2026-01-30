@@ -42,24 +42,32 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
     return null;
   }
 
+  // Monitor frame is at [0, 1.15, -0.3] with screen size 1.0 x 0.56
+  // Position the Html slightly in front of the monitor glass (z = -0.3 + 0.025 = -0.275)
   return (
-    <group ref={htmlRef} position={[0, 1.18, -0.18]}>
-      {/* Screen plane for visual reference - slightly behind the UI */}
-      <mesh position={[0, 0, -0.001]}>
-        <planeGeometry args={[0.52, 0.30]} />
+    <group ref={htmlRef} position={[0, 1.15, -0.275]}>
+      {/* Black backing plane - matches monitor screen size exactly */}
+      <mesh position={[0, 0, -0.002]}>
+        <planeGeometry args={[0.98, 0.55]} />
         <meshBasicMaterial color="#000000" />
+      </mesh>
+      
+      {/* Subtle screen glow when active */}
+      <mesh position={[0, 0, -0.003]}>
+        <planeGeometry args={[1.02, 0.58]} />
+        <meshBasicMaterial color="#00d4ff" transparent opacity={0.08} />
       </mesh>
       
       <Html
         transform
-        distanceFactor={0.28}
-        position={[0, 0, 0.001]}
+        distanceFactor={0.52}
+        position={[0, 0, 0]}
         rotation={[0, 0, 0]}
         zIndexRange={[100, 0]}
+        occlude={false}
         style={{
-          width: '1024px',
-          height: '576px',
-          borderRadius: '4px',
+          width: '1920px',
+          height: '1080px',
           overflow: 'hidden',
           pointerEvents: 'auto',
           userSelect: 'none',
@@ -67,15 +75,17 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
       >
         <div 
           style={{ 
-            width: '1024px', 
-            height: '576px',
+            width: '1920px', 
+            height: '1080px',
             background: '#0a0a12',
             display: 'flex',
             flexDirection: 'column',
+            transform: 'scale(1)',
+            transformOrigin: 'center center',
           }}
         >
           {!isReady ? (
-            // Boot screen
+            // Boot screen - Full HD resolution
             <div 
               style={{ 
                 width: '100%', 
@@ -84,37 +94,38 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
                 flexDirection: 'column', 
                 alignItems: 'center', 
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #0a0a12 0%, #1a1a2e 100%)',
+                background: 'linear-gradient(135deg, #0a0a12 0%, #1a1a2e 50%, #0a0a12 100%)',
               }}
             >
               <div 
                 style={{ 
                   color: '#00d4ff', 
                   fontFamily: 'monospace', 
-                  fontSize: '32px', 
-                  marginBottom: '24px',
-                  letterSpacing: '3px',
-                  textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
+                  fontSize: '64px', 
+                  marginBottom: '48px',
+                  letterSpacing: '6px',
+                  textShadow: '0 0 40px rgba(0, 212, 255, 0.6)',
+                  fontWeight: 'bold',
                 }}
               >
                 Portfolio OS
               </div>
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', gap: '16px', marginBottom: '40px' }}>
                 {[0, 1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
                     style={{ 
-                      width: '14px', 
-                      height: '14px', 
+                      width: '24px', 
+                      height: '24px', 
                       borderRadius: '50%',
                       background: '#00d4ff',
-                      opacity: 0.8,
-                      animation: `pulse 1s infinite ${i * 150}ms`,
+                      boxShadow: '0 0 20px rgba(0, 212, 255, 0.8)',
+                      animation: `pulse 1.2s ease-in-out infinite ${i * 150}ms`,
                     }}
                   />
                 ))}
               </div>
-              <div style={{ color: '#8b8b9e', fontFamily: 'monospace', fontSize: '16px' }}>
+              <div style={{ color: '#8b8b9e', fontFamily: 'monospace', fontSize: '28px' }}>
                 Initializing workspace...
               </div>
             </div>
