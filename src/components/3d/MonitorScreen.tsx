@@ -42,24 +42,27 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
     return null;
   }
 
+  // Monitor screen dimensions from WorkspaceScene:
+  // Monitor frame at position [0, 1.15, -0.3] with screen size ~1.0 x 0.56 units
+  // Screen glass at z-offset +0.024, we position just in front at +0.08
+  
   return (
     <group ref={htmlRef} position={[0, 1.15, -0.22]}>
       <Html
         transform
-        distanceFactor={0.65}
+        distanceFactor={1}
         position={[0, 0, 0]}
         rotation={[0, 0, 0]}
-        scale={0.06}
+        scale={[0.00098, 0.00098, 0.00098]}
         prepend
         center
         style={{
           width: '1024px',
           height: '576px',
-          borderRadius: '6px',
+          borderRadius: '4px',
           overflow: 'hidden',
           pointerEvents: 'auto',
           userSelect: 'none',
-          background: '#0a0a12',
         }}
       >
         <div 
@@ -69,6 +72,7 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
             background: '#0a0a12',
             display: 'flex',
             flexDirection: 'column',
+            overflow: 'hidden',
           }}
         >
           {!isReady ? (
@@ -81,38 +85,45 @@ const MonitorScreen = ({ isActive, onExit }: MonitorScreenProps) => {
                 flexDirection: 'column', 
                 alignItems: 'center', 
                 justifyContent: 'center',
-                background: '#0a0a12',
+                background: 'linear-gradient(135deg, #0a0a12 0%, #0d1020 50%, #0a0a12 100%)',
               }}
             >
               <div 
                 style={{ 
                   color: '#00d4ff', 
                   fontFamily: 'monospace', 
-                  fontSize: '28px', 
-                  marginBottom: '24px',
-                  letterSpacing: '2px',
+                  fontSize: '32px', 
+                  marginBottom: '32px',
+                  letterSpacing: '4px',
+                  textShadow: '0 0 20px rgba(0, 212, 255, 0.5)',
                 }}
-                className="animate-pulse"
               >
                 Portfolio OS
               </div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
                 {[0, 1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
                     style={{ 
-                      width: '12px', 
-                      height: '12px', 
+                      width: '16px', 
+                      height: '16px', 
                       borderRadius: '50%',
                       background: '#00d4ff',
-                      animation: `bounce 0.6s infinite ${i * 100}ms`,
+                      boxShadow: '0 0 10px rgba(0, 212, 255, 0.5)',
+                      animation: `pulse 1s infinite ${i * 150}ms`,
                     }}
                   />
                 ))}
               </div>
-              <div style={{ color: '#6b7280', fontFamily: 'monospace', fontSize: '14px' }}>
+              <div style={{ color: '#6b7280', fontFamily: 'monospace', fontSize: '16px' }}>
                 Initializing workspace...
               </div>
+              <style>{`
+                @keyframes pulse {
+                  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+                  50% { opacity: 1; transform: scale(1); }
+                }
+              `}</style>
             </div>
           ) : (
             <Desktop onExit={onExit} isEmbedded />
