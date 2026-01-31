@@ -3,6 +3,8 @@ import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { Environment, ContactShadows } from '@react-three/drei';
 import { WorkspaceScene } from './WorkspaceScene';
 import MonitorScreen from './MonitorScreen';
+import CozyRoom from './CozyRoom';
+import Character from './Character';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -155,16 +157,18 @@ interface SceneProps {
   enableMouseParallax?: boolean;
   showDesktop?: boolean;
   onExitDesktop?: () => void;
+  scrollProgress?: number;
 }
 
 const Scene = ({
-  cameraPosition = [3, 2.5, 4],
+  cameraPosition = [4, 2.8, 5],
   cameraLookAt = [0, 1, 0],
   isAnimating = false,
   screenOn = false,
   enableMouseParallax = true,
   showDesktop = false,
   onExitDesktop = () => {},
+  scrollProgress = 0,
 }: SceneProps) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
@@ -210,16 +214,23 @@ const Scene = ({
           isActive={showDesktop} 
           onExit={onExitDesktop} 
         />
+        
+        {/* Cozy room environment - separate scene */}
+        <CozyRoom scrollProgress={scrollProgress} />
+        
+        {/* Character with scroll-driven animation */}
+        <Character scrollProgress={scrollProgress} roomPosition={[6, 0, 0]} />
+        
         <ContactShadows
           position={[0, 0, 0]}
           opacity={0.5}
-          scale={10}
+          scale={15}
           blur={2}
           far={4}
         />
         <Environment preset="night" />
         {/* Lighter fog for better visibility */}
-        <fog attach="fog" args={['#080812', 6, 18]} />
+        <fog attach="fog" args={['#080812', 8, 25]} />
       </Suspense>
     </Canvas>
   );
