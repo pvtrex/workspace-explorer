@@ -14,11 +14,12 @@ const Index = () => {
   const [showDesktop, setShowDesktop] = useState(false);
   const [showLandingText, setShowLandingText] = useState(true);
   const [introTextShown, setIntroTextShown] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [cameraState, setCameraState] = useState<{
     position: [number, number, number];
     lookAt: [number, number, number];
   }>({
-    position: [3, 2.5, 4],
+    position: [4, 2.8, 5],
     lookAt: [0, 1, 0],
   });
   const [isAnimating, setIsAnimating] = useState(false);
@@ -34,6 +35,9 @@ const Index = () => {
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
         // Calculate progress based on total scrollable distance
         const progress = maxScroll > 0 ? Math.min(scrollY / maxScroll, 1) : 0;
+        
+        // Update scroll progress for room/character animation
+        setScrollProgress(progress);
 
         console.log('[Scroll] Progress:', progress.toFixed(2), 'ScrollY:', scrollY, 'MaxScroll:', maxScroll);
 
@@ -44,24 +48,25 @@ const Index = () => {
           console.log('[Scroll] Landing text hidden (one-time)');
         }
 
-        // Phase 2: Zoom to monitor (15-50%)
+        // Phase 2: Zoom to monitor (15-50%) - more dramatic close-up, slightly right of center
         if (progress >= 0.15 && progress < 0.5) {
           const zoomProgress = (progress - 0.15) / 0.35;
+          // Start: [4, 2.8, 5] -> End: [0.6, 1.4, 1.8] (closer and slightly right)
           const newPos: [number, number, number] = [
-            3 - zoomProgress * 2.2,
-            2.5 - zoomProgress * 1.0,
-            4 - zoomProgress * 2.0,
+            4 - zoomProgress * 3.4,  // Move from 4 to 0.6 (slightly right of center)
+            2.8 - zoomProgress * 1.4, // Move from 2.8 to 1.4 (eye level)
+            5 - zoomProgress * 3.2,   // Move from 5 to 1.8 (much closer)
           ];
           const newLookAt: [number, number, number] = [
-            0,
+            0 + zoomProgress * 0.1,   // Slight offset to the right
             1.15 + zoomProgress * 0.05,
-            0 - zoomProgress * 0.15,
+            -0.3 - zoomProgress * 0.1,
           ];
           setCameraState({ position: newPos, lookAt: newLookAt });
           setIsAnimating(true);
         } else if (progress < 0.15 && !desktopActivatedRef.current) {
           setCameraState({
-            position: [3, 2.5, 4],
+            position: [4, 2.8, 5],
             lookAt: [0, 1, 0],
           });
           setIsAnimating(true);
@@ -99,7 +104,7 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => {
       setCameraState({
-        position: [3, 2.5, 4],
+        position: [4, 2.8, 5],
         lookAt: [0, 1, 0],
       });
       setScreenOn(false);
@@ -136,6 +141,7 @@ const Index = () => {
             enableMouseParallax={!showDesktop}
             showDesktop={showDesktop}
             onExitDesktop={handleExitDesktop}
+            scrollProgress={scrollProgress}
           />
         </Suspense>
 
