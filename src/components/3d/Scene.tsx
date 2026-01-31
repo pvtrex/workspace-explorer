@@ -161,8 +161,8 @@ interface SceneProps {
 }
 
 const Scene = ({
-  cameraPosition = [4, 2.8, 5],
-  cameraLookAt = [0, 1, 0],
+  cameraPosition = [3.5, 2.2, 4.5],
+  cameraLookAt = [0, 1.1, 0],
   isAnimating = false,
   screenOn = false,
   enableMouseParallax = true,
@@ -185,7 +185,7 @@ const Scene = ({
   }, []);
 
   // Minimum Z distance - camera will never go closer than this
-  const MIN_CAMERA_Z = 1.2;
+  const MIN_CAMERA_Z = 1.3;
 
   return (
     <Canvas
@@ -215,11 +215,11 @@ const Scene = ({
           onExit={onExitDesktop} 
         />
         
-        {/* Cozy room environment - separate scene */}
+        {/* Cozy room environment - positioned to the right of workspace, visible when scrolling */}
         <CozyRoom scrollProgress={scrollProgress} />
         
-        {/* Character with scroll-driven animation */}
-        <Character scrollProgress={scrollProgress} roomPosition={[6, 0, 0]} />
+        {/* Character with scroll-driven animation - in the cozy room */}
+        <Character scrollProgress={scrollProgress} roomPosition={[4.5, 0, -3]} />
         
         <ContactShadows
           position={[0, 0, 0]}
