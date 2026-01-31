@@ -313,8 +313,10 @@ const Rug = ({ position }: { position: [number, number, number] }) => {
 const CozyRoom = ({ scrollProgress = 0 }: CozyRoomProps) => {
   const roomRef = useRef<THREE.Group>(null);
 
+  // Room is positioned to the right of the main workspace, slightly behind
+  // Position: [4.5, 0, -3] puts it visible when user looks right
   return (
-    <group ref={roomRef} position={[6, 0, 0]}>
+    <group ref={roomRef} position={[4.5, 0, -3]}>
       {/* Floor */}
       <WoodFloor />
       
@@ -347,8 +349,8 @@ const CozyRoom = ({ scrollProgress = 0 }: CozyRoomProps) => {
       <Rug position={[0, 0.01, 0]} />
       
       {/* Ambient room lighting */}
-      <ambientLight intensity={0.2} color="#fff5e6" />
-      <pointLight position={[0, 2.8, 0]} intensity={0.5} color="#fff8f0" distance={5} decay={2} />
+      <ambientLight intensity={0.25} color="#fff5e6" />
+      <pointLight position={[0, 2.8, 0]} intensity={0.6} color="#fff8f0" distance={6} decay={2} />
     </group>
   );
 };

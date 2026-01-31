@@ -8,19 +8,20 @@ interface CharacterProps {
   roomPosition?: [number, number, number];
 }
 
-const Character = ({ scrollProgress, roomPosition = [6, 0, 0] }: CharacterProps) => {
+const Character = ({ scrollProgress, roomPosition = [4.5, 0, -3] }: CharacterProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF('/models/character.glb');
   const { actions, names } = useAnimations(animations, groupRef);
   const [isWalking, setIsWalking] = useState(false);
 
   // Starting and ending positions relative to the room
+  // Character starts at entrance and walks to the lounge chair
   const startPosition = new THREE.Vector3(-1.5, 0, 1.5);
   const endPosition = new THREE.Vector3(1.2, 0, 0); // At the lounge chair
 
   // Character rotation to face the chair
-  const startRotation = 0;
-  const endRotation = -Math.PI / 4;
+  const startRotation = -Math.PI / 6; // Slightly angled initially
+  const endRotation = -Math.PI / 4;   // Facing the chair
 
   // Play walk animation when scrolling
   useEffect(() => {

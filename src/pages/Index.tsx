@@ -19,8 +19,8 @@ const Index = () => {
     position: [number, number, number];
     lookAt: [number, number, number];
   }>({
-    position: [4, 2.8, 5],
-    lookAt: [0, 1, 0],
+    position: [3.5, 2.2, 4.5],
+    lookAt: [0, 1.1, 0],
   });
   const [isAnimating, setIsAnimating] = useState(false);
   const [screenOn, setScreenOn] = useState(false);
@@ -48,26 +48,28 @@ const Index = () => {
           console.log('[Scroll] Landing text hidden (one-time)');
         }
 
-        // Phase 2: Zoom to monitor (15-50%) - more dramatic close-up, slightly right of center
+        // Phase 2: Zoom to monitor (15-50%) - immersive close-up, monitor right of center
         if (progress >= 0.15 && progress < 0.5) {
           const zoomProgress = (progress - 0.15) / 0.35;
-          // Start: [4, 2.8, 5] -> End: [0.6, 1.4, 1.8] (closer and slightly right)
+          // Smooth easing for cinematic feel
+          const eased = 1 - Math.pow(1 - zoomProgress, 3);
+          // Start: [3.5, 2.2, 4.5] -> End: [0.35, 1.25, 1.4] (very close, monitor right of center)
           const newPos: [number, number, number] = [
-            4 - zoomProgress * 3.4,  // Move from 4 to 0.6 (slightly right of center)
-            2.8 - zoomProgress * 1.4, // Move from 2.8 to 1.4 (eye level)
-            5 - zoomProgress * 3.2,   // Move from 5 to 1.8 (much closer)
+            3.5 - eased * 3.15,   // Move from 3.5 to 0.35 (camera slightly left, monitor appears right)
+            2.2 - eased * 0.95,   // Move from 2.2 to 1.25 (eye level with monitor)
+            4.5 - eased * 3.1,    // Move from 4.5 to 1.4 (very close to monitor)
           ];
           const newLookAt: [number, number, number] = [
-            0 + zoomProgress * 0.1,   // Slight offset to the right
-            1.15 + zoomProgress * 0.05,
-            -0.3 - zoomProgress * 0.1,
+            0 + eased * 0.15,     // Look slightly right toward monitor center
+            1.1 + eased * 0.05,   // Focus on monitor height
+            -0.3,                 // Monitor z position
           ];
           setCameraState({ position: newPos, lookAt: newLookAt });
           setIsAnimating(true);
         } else if (progress < 0.15 && !desktopActivatedRef.current) {
           setCameraState({
-            position: [4, 2.8, 5],
-            lookAt: [0, 1, 0],
+            position: [3.5, 2.2, 4.5],
+            lookAt: [0, 1.1, 0],
           });
           setIsAnimating(true);
         }
